@@ -1,6 +1,7 @@
 data "aws_caller_identity" "current" {}
 resource "aws_s3_bucket" "config_bucket" {
-    bucket = "config-bucket-1234"
+    # bucket = "config-bucket-1234"
+    bucket = "guardrail-config-${data.aws_caller_identity.current.account_id}"
   
 }
 
@@ -75,9 +76,13 @@ resource "aws_iam_role" "config_Role" {
   name = "config_Role"
 
   assume_role_policy = jsonencode({
-    version = "2012-10-17"
-    statement = [{
-        action = "sts:AssumeRole"
+    Version = "2012-10-17"
+    Statement = [{
+        "Effect": "Allow"
+        "Principal": {
+  "Service": "config.amazonaws.com"
+}
+        Action = "sts:AssumeRole"
     }]
   })
 }
@@ -146,7 +151,7 @@ resource "aws_iam_role_policy" "config_s3_delivery_policy" {
 }
 
 resource "aws_config_configuration_recorder" "this" {
-    name = default
+    name = "default"
     role_arn = aws_iam_role.config_Role.arn
   
     recording_group {
